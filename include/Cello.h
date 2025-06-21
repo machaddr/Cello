@@ -756,6 +756,22 @@ void mark(var self, var gc, void(*f)(var,void*));
 
 extern var GC;
 
+// C-friendly GC memory management functions
+void* gc_malloc(size_t size);
+void* gc_calloc(size_t nmemb, size_t size);
+void* gc_realloc(void* ptr, size_t size);
+void gc_free(void* ptr);
+void gc_register_ptr(void* ptr, size_t size);
+void gc_unregister_ptr(void* ptr);
+
+// Automatic GC integration for all C code
+// Define CELLO_NO_AUTO_GC to disable automatic malloc/free override
+// When enabled, all malloc/calloc/realloc/free calls automatically use GC
+#ifndef CELLO_NO_AUTO_GC
+  // The actual overrides are implemented in GC.c
+  // This ensures all C code gets automatic garbage collection
+#endif
+
 int Cello_Main(int argc, char** argv);
 void Cello_Exit(void);
 
@@ -769,5 +785,18 @@ void Cello_Exit(void);
   int Cello_Main(__VA_ARGS__)
 
 #endif
+
+/* Include all standard library headers */
+#include "Math.h"
+#include "Collections.h"
+#include "Io.h"
+#include "Strings.h"
+#include "Time.h"
+#include "Os.h"
+
+/* Standard Library Functions Available */
+/* All standard library functions are compiled into libCello.a */
+/* No import() statements needed - functions are directly available */
+
   
 #endif

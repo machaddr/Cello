@@ -481,13 +481,28 @@ static var GC_Current(void) {
 
 static void GC_New(var self, var args) {
   struct GC* gc = self;
-  struct Ref* bt = cast(get(args, $I(0)), Ref);
-  gc->bottom = bt->val;
+  
+  /* Initialize GC structure first */
   gc->maxptr = 0;
   gc->minptr = UINTPTR_MAX;
   gc->running = true;
   gc->freelist = NULL;
   gc->freenum = 0;
+  gc->entries = calloc(GC_Ideal_Size(1), sizeof(struct GCEntry));
+  gc->nslots = GC_Ideal_Size(1);
+  gc->nitems = 0;
+  gc->mitems = 1;
+  
+  /* Handle bottom pointer safely for TinyCC compatibility */
+  var ref_arg = get(args, $I(0));
+  if (ref_arg) {
+    /* Directly access the Ref structure without type checking */
+    struct Ref* bt = (struct Ref*)ref_arg;
+    gc->bottom = bt->val;
+  } else {
+    gc->bottom = NULL;
+  }
+  
   set(current(Thread), $S(GC_TLS_KEY), gc);
 }
 
